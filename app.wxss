@@ -1,0 +1,44 @@
+/* app.wxss  全局基础样式
+   主题色：中国红 #8B1A1A / #C0392B   鎏金黄 #D4AF37
+   背景：浅米色  卡片：纯白+阴影  字体：系统黑体
+*/
+
+page {
+  background: linear-gradient(160deg, #F5F0E8 0%, #EDE8DC 100%);
+  min-height: 100vh;
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+  color: #333;
+  box-sizing: border-box;
+}
+
+/* ─── 分数颜色 ──────────────────────── */
+.score-pos  { color: #C8960C; font-weight: 700; }   /* 金色正数   */
+.score-neg  { color: #C0392B; font-weight: 700; }   /* 红色负数   */
+.score-zero { color: #AAAAAA; font-weight: 700; }   /* 灰色零分   */
+
+/* ─── 通用卡片 ──────────────────────── */
+.card {
+  background: #FFFEF8;
+  border-radius: 24rpx;
+  box-shadow: 0 6rpx 24rpx rgba(139, 26, 26, 0.10);
+  overflow: hidden;
+}
+
+/* ─── 遮罩层 ────────────────────────── */
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.50);
+  z-index: 100;
+}
+
+/* ─── 点击缩放动效 ──────────────────── */
+.tap-scale { transition: transform 0.12s ease; }
+.tap-scale:active { transform: scale(0.93); }
+
+/* ─── 分隔线 ────────────────────────── */
+.divider {
+  height: 2rpx;
+  background: linear-gradient(90deg, transparent, #E8D5B0, transparent);
+  margin: 20rpx 0;
+}

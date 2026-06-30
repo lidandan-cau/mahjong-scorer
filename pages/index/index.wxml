@@ -1,0 +1,408 @@
+<!-- pages/index/index.wxml  核心计分页 v2.0 -->
+<view class="page">
+
+  <!-- ══════════ 顶部标题栏 ══════════ -->
+  <view class="header">
+    <view class="header-deco">🀄</view>
+    <view class="header-center">
+      <text class="header-title">麻将计分器</text>
+      <view class="header-meta">
+        <text class="meta-item">第 {{currentRound}} 局</text>
+        <text class="meta-sep">·</text>
+        <text class="meta-item">底分 {{settings.baseScore}}</text>
+        <text class="meta-sep">·</text>
+        <text class="meta-item">庄：{{players[zhuangJiaId].name}}</text>
+        <text class="meta-sep" wx:if="{{lianZhuangCount > 0}}">·</text>
+        <text class="meta-item lian-tag" wx:if="{{lianZhuangCount > 0}}">连×{{lianZhuangCount}}</text>
+      </view>
+    </view>
+    <view class="header-deco">🀄</view>
+  </view>
+
+  <!-- ══════════ 四名玩家卡片 ══════════ -->
+  <view class="players-grid">
+    <view
+      class="player-card card {{item.isZhuang ? 'card-zhuang' : ''}} {{item.hidden ? 'card-hidden' : ''}}"
+      wx:for="{{players}}" wx:key="id"
+    >
+      <!-- 隐藏态：只显示名称和总分 -->
+      <view class="hidden-card" wx:if="{{item.hidden}}">
+        <text class="hc-name">{{item.name}}</text>
+        <text class="hc-score {{item.totalScoreCls}}">{{item.totalScoreStr}}</text>
+        <view class="hc-show tap-scale" bindtap="onToggleHide" data-id="{{item.id}}">显示</view>
+      </view>
+
+      <!-- 正常展开态 -->
+      <block wx:else>
+        <!-- 名称行：[名字✏] [庄] [重置]，三者在同一行依次排列 -->
+        <view class="player-name-row">
+          <view class="player-name-tap" bindtap="onPlayerNameTap" data-id="{{item.id}}">
+            <text class="player-name">{{item.name}}</text>
+            <text class="edit-hint">✏</text>
+          </view>
+          <!-- 庄标：在名字与重置之间 -->
+          <view
+            class="zhuang-badge {{item.isZhuang ? 'zhuang-on' : 'zhuang-off'}} tap-scale"
+            bindtap="onSetZhuang" data-id="{{item.id}}"
+          >庄</view>
+          <!-- 重置按钮：右上角，紧跟庄标右侧 -->
+          <view class="reset-player tap-scale" bindtap="onResetPlayerScore" data-id="{{item.id}}">重置</view>
+        </view>
+
+        <!-- 分数区 -->
+        <view class="score-area">
+          <view class="score-row">
+            <text class="score-label">本局</text>
+            <text class="score-val {{item.roundScoreCls}}">{{item.roundScoreStr}}</text>
+          </view>
+          <view class="score-divider"></view>
+          <view class="score-row">
+            <text class="score-label">总分</text>
+            <text class="score-val big {{item.totalScoreCls}}">{{item.totalScoreStr}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- ══════════ 胡牌操作区 ══════════ -->
+  <view class="op-group">
+    <text class="op-group-title">胡牌</text>
+    <view class="op-row-main">
+      <view class="op-btn btn-red tap-scale" bindtap="onOpBtnTap" data-type="dianpao">
+        <text class="op-icon">🎴</text><text class="op-text">点炮胡</text>
+      </view>
+      <view class="op-btn btn-gold tap-scale" bindtap="onOpBtnTap" data-type="zimo">
+        <text class="op-icon">✨</text><text class="op-text">自摸胡</text>
+      </view>
+    </view>
+    <view class="op-row-main">
+      <view class="op-btn btn-green tap-scale" bindtap="onOpBtnTap" data-type="gangHua">
+        <text class="op-icon">🌸</text><text class="op-text">杠上开花</text>
+      </view>
+      <view class="op-btn btn-darkblue tap-scale" bindtap="onOpBtnTap" data-type="gangPao">
+        <text class="op-icon">💥</text><text class="op-text">杠上炮</text>
+      </view>
+    </view>
+    <view class="op-row-main op-row-single">
+      <view class="op-btn btn-purple tap-scale" bindtap="onOpBtnTap" data-type="qiangGang">
+        <text class="op-icon">⚡</text><text class="op-text">抢杠胡</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ══════════ 杠牌操作区 ══════════ -->
+  <view class="op-group">
+    <text class="op-group-title">杠牌</text>
+    <view class="op-row-main">
+      <view class="op-btn btn-darkgreen tap-scale" bindtap="onOpBtnTap" data-type="mingGang">
+        <text class="op-text">明杠</text>
+      </view>
+      <view class="op-btn btn-teal tap-scale" bindtap="onOpBtnTap" data-type="buGang">
+        <text class="op-text">补杠</text>
+      </view>
+      <view class="op-btn btn-slate tap-scale" bindtap="onOpBtnTap" data-type="anGang">
+        <text class="op-text">暗杠</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ══════════ 辅助操作区 ══════════ -->
+  <view class="op-group op-group-last">
+    <view class="op-row-sub">
+      <view class="sub-btn btn-liuju tap-scale {{settings.liuJuEnabled ? '' : 'btn-disabled'}}" bindtap="onLiuJuTap">
+        🌊 流局
+      </view>
+      <view class="sub-btn btn-manual tap-scale" bindtap="onManualTap">
+        ✎ 手动调分
+      </view>
+    </view>
+    <view class="op-row-sub">
+      <view class="sub-btn btn-undo tap-scale {{canUndo ? '' : 'btn-disabled'}}" bindtap="onUndo">
+        ↩ 撤销
+      </view>
+      <view class="sub-btn btn-clear tap-scale" bindtap="onClearRound">
+        🗑 清空本局
+      </view>
+    </view>
+  </view>
+
+  <!-- ══════════ 底部导航 ══════════ -->
+  <view class="bottom-nav">
+    <view class="nav-btn tap-scale" bindtap="onResetScores">
+      <text class="nav-icon">🔄</text><text class="nav-label">重置总分</text>
+    </view>
+    <view class="nav-btn tap-scale" bindtap="goSettings">
+      <text class="nav-icon">⚙️</text><text class="nav-label">设置</text>
+    </view>
+    <view class="nav-btn tap-scale" bindtap="goHistory">
+      <text class="nav-icon">📋</text><text class="nav-label">历史</text>
+    </view>
+  </view>
+
+
+  <!-- ══════════ 操作面板（底部滑出） ══════════ -->
+  <view class="overlay" wx:if="{{panelVisible}}" bindtap="onClosePanel"></view>
+  <view class="op-panel {{panelVisible ? 'op-panel-show' : ''}}">
+
+    <!-- 面板头 -->
+    <view class="panel-header">
+      <view class="panel-close tap-scale" bindtap="onClosePanel">✕</view>
+      <text class="panel-title">{{panelTitle}}</text>
+      <view style="width:60rpx"></view>
+    </view>
+
+    <!-- 番型列表（覆盖主内容） -->
+    <view class="fan-list-overlay" wx:if="{{fanListVisible}}">
+      <view class="fan-list-header">
+        <text class="fh-title">选择番型（可多选）</text>
+        <view class="fh-done tap-scale" bindtap="onCloseFanList">完成</view>
+      </view>
+      <view class="fan-list">
+        <view
+          class="fan-item tap-scale {{selectedFanIds.indexOf(item.id) >= 0 ? 'fan-item-on' : ''}}"
+          wx:for="{{settings.fanTypes}}" wx:key="id"
+          wx:if="{{item.enabled}}"
+          bindtap="onToggleFan"
+          data-fanid="{{item.id}}"
+        >
+          <text class="fi-name">{{item.name}}</text>
+          <text class="fi-rate">×{{item.rate}}</text>
+          <text class="fi-check">{{selectedFanIds.indexOf(item.id) >= 0 ? '✓' : ''}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 主内容（番型列表关闭时显示） -->
+    <scroll-view scroll-y class="panel-scroll" wx:if="{{!fanListVisible}}">
+
+      <!-- 步骤提示 -->
+      <text class="panel-hint">{{panelHint}}</text>
+
+      <!-- 玩家选择 -->
+      <view class="panel-players">
+        <view
+          class="psel-btn tap-scale {{selWinnerId === item.id ? 'psel-winner' : selShooterId === item.id || selGangerId === item.id ? 'psel-shooter' : ''}} {{opType === 'dianpao' && opStep === 1 && selWinnerId === item.id ? 'psel-disabled' : ''}} {{(opType === 'gangPao' || opType === 'qiangGang') && opStep === 1 && selWinnerId === item.id ? 'psel-disabled' : ''}}"
+          wx:for="{{players}}"
+          wx:if="{{!item.hidden}}"
+          wx:key="id"
+          bindtap="onPanelPlayerTap"
+          data-id="{{item.id}}"
+        >
+          <!-- 庄家角标 -->
+          <view class="psel-zhuang-tag" wx:if="{{item.isZhuang && settings.zhuangEnabled}}">庄</view>
+          <text class="psel-name">{{item.name}}</text>
+          <text class="psel-score {{item.totalScoreCls}}">{{item.totalScoreStr}}</text>
+          <!-- 预览得失 -->
+          <text
+            class="psel-preview {{previewDeltas[item.id] > 0 ? 'score-pos' : previewDeltas[item.id] < 0 ? 'score-neg' : 'score-zero'}}"
+            wx:if="{{previewDeltas[item.id] !== 0}}"
+          >{{previewDeltas[item.id] > 0 ? '+' : ''}}{{previewDeltas[item.id]}}</text>
+          <!-- 角色角标 -->
+          <view class="psel-badge psel-badge-win" wx:if="{{selWinnerId === item.id}}">
+            {{opType === 'dianpao' || opType === 'zimo' || opType === 'gangHua' || opType === 'gangPao' || opType === 'qiangGang' ? '胡' : '杠'}}
+          </view>
+          <view class="psel-badge psel-badge-shot" wx:if="{{selShooterId === item.id || selGangerId === item.id}}">
+            {{opType === 'gangPao' || opType === 'qiangGang' ? '杠' : '炮'}}
+          </view>
+        </view>
+      </view>
+
+      <!-- 杠类型选择（gangHua / gangPao 时显示） -->
+      <view class="gang-type-row" wx:if="{{showGangTypeSel}}">
+        <text class="gtr-label">选择杠的类型：</text>
+        <view class="gang-type-btns">
+          <view
+            class="gtype-btn tap-scale {{selGangType === 'ming' ? 'gtype-on' : ''}}"
+            bindtap="onSelectGangType" data-gangtype="ming">明杠</view>
+          <view
+            class="gtype-btn tap-scale {{selGangType === 'bu' ? 'gtype-on' : ''}}"
+            bindtap="onSelectGangType" data-gangtype="bu">补杠</view>
+          <view
+            class="gtype-btn tap-scale {{selGangType === 'an' ? 'gtype-on' : ''}}"
+            bindtap="onSelectGangType" data-gangtype="an">暗杠</view>
+        </view>
+      </view>
+
+      <!-- 番型选择入口（胡牌操作时显示） -->
+      <view
+        class="fan-entry tap-scale"
+        wx:if="{{opType === 'dianpao' || opType === 'zimo' || opType === 'gangHua' || opType === 'gangPao' || opType === 'qiangGang'}}"
+        bindtap="onOpenFanList"
+      >
+        <text class="fe-label">🎲 选择番型</text>
+        <text class="fe-val" wx:if="{{selectedFanIds.length === 0}}">暂未选择</text>
+        <text class="fe-val fe-active" wx:if="{{selectedFanIds.length > 0}}">已选 {{selectedFanIds.length}} 个 ›</text>
+      </view>
+
+      <!-- 大胡加倍（胡牌操作时显示） -->
+      <view
+        class="double-row"
+        wx:if="{{opType === 'dianpao' || opType === 'zimo' || opType === 'gangHua' || opType === 'gangPao' || opType === 'qiangGang'}}"
+      >
+        <view class="double-toggle tap-scale {{isDouble ? 'double-on' : ''}}" bindtap="onToggleDouble">
+          <view class="toggle-dot"></view>
+        </view>
+        <text class="double-label">大胡加倍（×2）</text>
+        <text class="double-hint" wx:if="{{isDouble}}">翻倍已开！</text>
+      </view>
+
+      <!-- 庄家提示 -->
+      <view class="zhuang-tip" wx:if="{{settings.zhuangEnabled && selWinnerId !== -1 && players[selWinnerId].isZhuang}}">
+        <text class="zhuang-tip-text">⚡ 庄家胡/杠  ×{{settings.zhuangRate}}{{lianZhuangCount > 0 ? '  连庄×' + (lianZhuangCount + 1) : ''}}</text>
+      </view>
+
+      <!-- 底部按钮 -->
+      <view class="panel-footer">
+        <view class="pfooter-cancel tap-scale" bindtap="onClosePanel">取 消</view>
+        <view class="pfooter-confirm tap-scale" bindtap="onConfirmOp">确认结算</view>
+      </view>
+    </scroll-view>
+
+  </view>
+
+
+  <!-- ══════════ 局终结算弹窗 ══════════ -->
+  <view class="overlay" wx:if="{{settlementVisible}}"></view>
+  <view class="settle-popup card" wx:if="{{settlementVisible}}">
+
+    <view class="settle-header">
+      <text class="settle-round">第 {{settlement.round}} 局结算</text>
+      <text class="settle-op">{{settlement.opLabel}}</text>
+      <text class="settle-winner" wx:if="{{settlement.winnerName}}">
+        🏆 {{settlement.winnerName}}胡牌
+        <text wx:if="{{settlement.shooterName}}">（{{settlement.shooterName}}点炮）</text>
+      </text>
+    </view>
+
+    <view class="divider"></view>
+
+    <!-- 四人得失 -->
+    <view class="settle-rows">
+      <view class="settle-row" wx:for="{{settlement.items}}" wx:key="name">
+        <text class="sr-name">{{item.name}}</text>
+        <view class="sr-right">
+          <text class="sr-delta {{item.deltaCls}}">{{item.delta}}</text>
+          <text class="sr-arrow">→</text>
+          <text class="sr-total {{item.totalCls}}">{{item.total}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 倍率明细 -->
+    <view class="settle-breakdown" wx:if="{{settlement.breakdown}}">
+      <text class="sb-item" wx:if="{{settlement.breakdown.fanRate > 1}}">
+        番型×{{settlement.breakdown.fanRate}}
+      </text>
+      <text class="sb-sep" wx:if="{{settlement.breakdown.fanRate > 1 && settlement.breakdown.zhuangRate > 1}}"> · </text>
+      <text class="sb-item" wx:if="{{settlement.breakdown.zhuangRate > 1}}">
+        庄家×{{settlement.breakdown.zhuangRate}}
+      </text>
+      <text class="sb-sep" wx:if="{{settlement.breakdown.zhuangRate > 1 && settlement.breakdown.lianRate > 1}}"> · </text>
+      <text class="sb-item" wx:if="{{settlement.breakdown.lianRate > 1}}">
+        连庄×{{settlement.breakdown.lianRate}}
+      </text>
+      <text class="sb-sep" wx:if="{{settlement.breakdown.doubleRate > 1}}"> · </text>
+      <text class="sb-item" wx:if="{{settlement.breakdown.doubleRate > 1}}">
+        大胡×{{settlement.breakdown.doubleRate}}
+      </text>
+    </view>
+
+    <view class="divider"></view>
+
+    <!-- 连庄/换庄 -->
+    <view class="settle-choice" wx:if="{{showZhuangChoice}}">
+      <view class="sc-lian tap-scale" bindtap="onChooseLianZhuang">
+        🔥 连庄
+      </view>
+      <view class="sc-huan tap-scale" bindtap="onChooseHuanZhuang">
+        🔄 换庄
+      </view>
+    </view>
+    <view class="settle-footer tap-scale" wx:if="{{!showZhuangChoice}}" bindtap="onConfirmSettlement">
+      确认（自动换庄）▶
+    </view>
+
+  </view>
+
+
+  <!-- ══════════ 流局确认弹窗 ══════════ -->
+  <view class="overlay" wx:if="{{liuJuVisible}}"></view>
+  <view class="liuju-popup card" wx:if="{{liuJuVisible}}">
+    <text class="lp-title">🌊 流局</text>
+    <view class="lp-rules">
+      <text class="lp-rule">扣底分：{{settings.liuJuDeductBase ? '是（庄家收，闲家付）' : '否'}}</text>
+      <text class="lp-rule">保留庄家：{{settings.liuJuKeepZhuang ? '是' : '否（自动换庄）'}}</text>
+      <text class="lp-rule">清零连庄：{{settings.liuJuResetLianZhuang ? '是' : '否'}}</text>
+    </view>
+    <view class="lp-btns">
+      <view class="lp-cancel tap-scale" bindtap="onCloseLiuJu">取消</view>
+      <view class="lp-confirm tap-scale" bindtap="onConfirmLiuJu">确认流局</view>
+    </view>
+  </view>
+
+
+  <!-- ══════════ 手动加减分弹窗 ══════════ -->
+  <view class="overlay" wx:if="{{manualVisible}}" bindtap="onCloseManual"></view>
+  <view class="manual-popup card" wx:if="{{manualVisible}}">
+    <text class="manual-title">手动调整分数</text>
+    <text class="manual-hint">选择玩家，输入调整量（正数=加分，负数=减分）</text>
+    <text class="manual-warn">⚠ 此操作不可撤销，请确认分数无误</text>
+
+    <!-- 选玩家 -->
+    <view class="manual-players">
+      <view
+        class="mp-btn tap-scale {{manualPlayerId === item.id ? 'mp-btn-on' : ''}}"
+        wx:for="{{players}}"
+        wx:if="{{!item.hidden}}"
+        wx:key="id"
+        bindtap="onManualSelectPlayer"
+        data-id="{{item.id}}"
+      >{{item.name}}</view>
+    </view>
+
+    <!-- 快捷金额 -->
+    <view class="manual-presets">
+      <view class="mp-preset tap-scale" bindtap="onManualSetAmount" data-val="-10">-10</view>
+      <view class="mp-preset tap-scale" bindtap="onManualSetAmount" data-val="-5">-5</view>
+      <view class="mp-preset tap-scale" bindtap="onManualSetAmount" data-val="5">+5</view>
+      <view class="mp-preset tap-scale" bindtap="onManualSetAmount" data-val="10">+10</view>
+    </view>
+
+    <!-- 输入框 -->
+    <input
+      class="manual-input"
+      type="number"
+      value="{{manualAmountStr}}"
+      placeholder="输入调整分数（可负数）"
+      bindinput="onManualInput"
+    />
+
+    <view class="manual-btns">
+      <view class="mb-cancel tap-scale" bindtap="onCloseManual">取消</view>
+      <view class="mb-confirm tap-scale" bindtap="onConfirmManual">确认调整</view>
+    </view>
+  </view>
+
+
+  <!-- ══════════ 改名弹窗 ══════════ -->
+  <view class="overlay" wx:if="{{renameVisible}}" bindtap="onCancelRename"></view>
+  <view class="rename-popup card" wx:if="{{renameVisible}}">
+    <text class="rename-title">修改昵称</text>
+    <input
+      class="rename-input"
+      value="{{renameTmp}}"
+      maxlength="6"
+      placeholder="请输入昵称（最多6字）"
+      bindinput="onRenameInput"
+      focus="{{renameVisible}}"
+      confirm-type="done"
+      bindconfirm="onConfirmRename"
+    />
+    <view class="rename-btns">
+      <view class="rbtn-cancel tap-scale" bindtap="onCancelRename">取消</view>
+      <view class="rbtn-confirm tap-scale" bindtap="onConfirmRename">确认</view>
+    </view>
+  </view>
+
+</view>

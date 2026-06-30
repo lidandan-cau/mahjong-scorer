@@ -1,0 +1,344 @@
+<!-- pages/settings/settings.wxml  计分设置页 -->
+<scroll-view class="page" scroll-y>
+
+  <!-- 未保存提示条 -->
+  <view class="tip-bar" wx:if="{{changed}}">
+    <text class="tip-text">⚠ 有未保存的修改</text>
+    <view class="tip-save tap-scale" bindtap="onSave">立即保存</view>
+  </view>
+
+  <!-- ═══ 基础计分 ═══ -->
+  <view class="section-title">📐 基础计分</view>
+  <view class="section card">
+
+    <view class="setting-row">
+      <view class="sr-left">
+        <text class="sr-label">底分</text>
+        <text class="sr-desc">每次操作的基础分值（≥1）</text>
+      </view>
+      <input class="sr-input" type="number" value="{{settings.baseScore}}"
+        data-key="baseScore" bindinput="onInput" bindblur="onBlur" placeholder="1"/>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="setting-row">
+      <view class="sr-left">
+        <text class="sr-label">全局倍数</text>
+        <text class="sr-desc">所有操作的倍率乘数</text>
+      </view>
+      <view class="sr-input-wrap">
+        <text class="sr-unit">×</text>
+        <input class="sr-input" type="number" value="{{settings.globalMultiplier}}"
+          data-key="globalMultiplier" bindinput="onInput" bindblur="onBlur" placeholder="1"/>
+      </view>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="setting-row">
+      <view class="sr-left">
+        <text class="sr-label">分数封顶</text>
+        <text class="sr-desc">单次操作最高分（0=不限）</text>
+      </view>
+      <input class="sr-input" type="number" value="{{settings.maxScore}}"
+        data-key="maxScore" bindinput="onInput" bindblur="onBlur" placeholder="0"/>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="setting-row">
+      <view class="sr-left">
+        <text class="sr-label">最低负分</text>
+        <text class="sr-desc">玩家总分下限（0=不限）</text>
+      </view>
+      <input class="sr-input" type="number" value="{{settings.minTotalScore}}"
+        data-key="minTotalScore" bindinput="onInput" bindblur="onBlur" placeholder="0"/>
+    </view>
+
+  </view>
+
+  <!-- ═══ 胡牌倍率 ═══ -->
+  <view class="section-title">🎴 胡牌倍率</view>
+  <view class="section card">
+
+    <view class="setting-row">
+      <view class="sr-left">
+        <text class="sr-label">点炮倍率</text>
+        <text class="sr-desc">点炮胡 = 底分 × 倍率 × 全局倍数</text>
+      </view>
+      <view class="sr-input-wrap">
+        <text class="sr-unit">×</text>
+        <input class="sr-input" type="number" value="{{settings.dianpaoMultiplier}}"
+          data-key="dianpaoMultiplier" bindinput="onInput" bindblur="onBlur" placeholder="1"/>
+      </view>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="setting-row">
+      <view class="sr-left">
+        <text class="sr-label">自摸倍率</text>
+        <text class="sr-desc">自摸胡 = 底分 × 倍率 × 全局倍数（每人出）</text>
+      </view>
+      <view class="sr-input-wrap">
+        <text class="sr-unit">×</text>
+        <input class="sr-input" type="number" value="{{settings.zimoMultiplier}}"
+          data-key="zimoMultiplier" bindinput="onInput" bindblur="onBlur" placeholder="1"/>
+      </view>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="setting-row">
+      <view class="sr-left">
+        <text class="sr-label">杠上开花倍率</text>
+        <text class="sr-desc">杠上开花 = 底分 × 倍率 × 全局倍数（每人出）</text>
+      </view>
+      <view class="sr-input-wrap">
+        <text class="sr-unit">×</text>
+        <input class="sr-input" type="number" value="{{settings.gangHuaMultiplier}}"
+          data-key="gangHuaMultiplier" bindinput="onInput" bindblur="onBlur" placeholder="1"/>
+      </view>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="setting-row">
+      <view class="sr-left">
+        <text class="sr-label">杠上炮倍率</text>
+        <text class="sr-desc">杠上炮 = 底分 × 倍率 × 全局倍数</text>
+      </view>
+      <view class="sr-input-wrap">
+        <text class="sr-unit">×</text>
+        <input class="sr-input" type="number" value="{{settings.gangPaoMultiplier}}"
+          data-key="gangPaoMultiplier" bindinput="onInput" bindblur="onBlur" placeholder="1"/>
+      </view>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="setting-row">
+      <view class="sr-left">
+        <text class="sr-label">抢杠胡倍率</text>
+        <text class="sr-desc">抢杠胡 = 底分 × 倍率 × 全局倍数</text>
+      </view>
+      <view class="sr-input-wrap">
+        <text class="sr-unit">×</text>
+        <input class="sr-input" type="number" value="{{settings.qiangGangMultiplier}}"
+          data-key="qiangGangMultiplier" bindinput="onInput" bindblur="onBlur" placeholder="1"/>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- ═══ 杠分设置 ═══ -->
+  <view class="section-title">🀄 杠分设置</view>
+  <view class="section card">
+
+    <view class="setting-row">
+      <view class="sr-left">
+        <text class="sr-label">明杠（每人付）</text>
+        <text class="sr-desc">明杠时，其余三家各付此分值</text>
+      </view>
+      <input class="sr-input" type="number" value="{{settings.mingGangScore}}"
+        data-key="mingGangScore" bindinput="onInput" bindblur="onBlur" placeholder="1"/>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="setting-row">
+      <view class="sr-left">
+        <text class="sr-label">补杠（每人付）</text>
+        <text class="sr-desc">补杠时，其余三家各付此分值</text>
+      </view>
+      <input class="sr-input" type="number" value="{{settings.buGangScore}}"
+        data-key="buGangScore" bindinput="onInput" bindblur="onBlur" placeholder="1"/>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="setting-row">
+      <view class="sr-left">
+        <text class="sr-label">暗杠（每人付）</text>
+        <text class="sr-desc">暗杠时，其余三家各付此分值</text>
+      </view>
+      <input class="sr-input" type="number" value="{{settings.anGangScore}}"
+        data-key="anGangScore" bindinput="onInput" bindblur="onBlur" placeholder="2"/>
+    </view>
+
+  </view>
+
+  <!-- ═══ 庄家 & 连庄 ═══ -->
+  <view class="section-title">👑 庄家 &amp; 连庄</view>
+  <view class="section card">
+
+    <view class="setting-row">
+      <view class="sr-left">
+        <text class="sr-label">启用庄家倍率</text>
+        <text class="sr-desc">庄家胡/被胡时，分数按倍率倍增</text>
+      </view>
+      <view class="toggle-switch tap-scale {{settings.zhuangEnabled ? 'toggle-on' : ''}}"
+        data-key="zhuangEnabled" bindtap="onToggle">
+        <view class="toggle-knob"></view>
+      </view>
+    </view>
+
+    <view wx:if="{{settings.zhuangEnabled}}">
+      <view class="divider"></view>
+      <view class="setting-row">
+        <view class="sr-left">
+          <text class="sr-label">庄家倍率</text>
+          <text class="sr-desc">庄家得/出分 = 闲家 × 该倍率</text>
+        </view>
+        <view class="sr-input-wrap">
+          <text class="sr-unit">×</text>
+          <input class="sr-input" type="number" value="{{settings.zhuangRate}}"
+            data-key="zhuangRate" bindinput="onInput" bindblur="onBlur" placeholder="2"/>
+        </view>
+      </view>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="setting-row">
+      <view class="sr-left">
+        <text class="sr-label">启用连庄加成</text>
+        <text class="sr-desc">连庄次数越多，额外叠加倍率</text>
+      </view>
+      <view class="toggle-switch tap-scale {{settings.lianZhuangEnabled ? 'toggle-on' : ''}}"
+        data-key="lianZhuangEnabled" bindtap="onToggle">
+        <view class="toggle-knob"></view>
+      </view>
+    </view>
+
+    <view wx:if="{{settings.lianZhuangEnabled}}">
+      <view class="divider"></view>
+      <view class="setting-row">
+        <view class="sr-left">
+          <text class="sr-label">连庄上限</text>
+          <text class="sr-desc">连庄倍率上限（0=不限）</text>
+        </view>
+        <input class="sr-input" type="number" value="{{settings.lianZhuangMax}}"
+          data-key="lianZhuangMax" bindinput="onInput" bindblur="onBlur" placeholder="0"/>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- ═══ 番型倍率 ═══ -->
+  <view class="section-title">🎲 番型倍率</view>
+  <view class="section card">
+    <view class="fan-header">
+      <text class="fan-hname">番型名称</text>
+      <text class="fan-hrate">倍率</text>
+      <text class="fan-htoggle">启用</text>
+    </view>
+    <view class="divider"></view>
+    <block wx:for="{{settings.fanTypes}}" wx:key="id">
+      <view class="fan-row">
+        <text class="fan-name">{{item.name}}</text>
+        <view class="sr-input-wrap">
+          <text class="sr-unit">×</text>
+          <input class="sr-input fan-rate-input" type="number" value="{{item.rate}}"
+            data-idx="{{index}}" bindinput="onFanRateInput" bindblur="onFanRateBlur"
+            disabled="{{!item.enabled}}" placeholder="1"/>
+        </view>
+        <view class="toggle-switch tap-scale {{item.enabled ? 'toggle-on' : ''}}"
+          data-idx="{{index}}" bindtap="onFanToggle">
+          <view class="toggle-knob"></view>
+        </view>
+      </view>
+      <view class="divider" wx:if="{{index < settings.fanTypes.length - 1}}"></view>
+    </block>
+  </view>
+
+  <!-- ═══ 流局规则 ═══ -->
+  <view class="section-title">🌊 流局规则</view>
+  <view class="section card">
+
+    <view class="setting-row">
+      <view class="sr-left">
+        <text class="sr-label">启用流局</text>
+        <text class="sr-desc">允许宣告流局结算</text>
+      </view>
+      <view class="toggle-switch tap-scale {{settings.liuJuEnabled ? 'toggle-on' : ''}}"
+        data-key="liuJuEnabled" bindtap="onToggle">
+        <view class="toggle-knob"></view>
+      </view>
+    </view>
+
+    <view wx:if="{{settings.liuJuEnabled}}">
+
+      <view class="divider"></view>
+      <view class="setting-row">
+        <view class="sr-left">
+          <text class="sr-label">流局扣底分</text>
+          <text class="sr-desc">流局时，每人扣除底分×全局倍数</text>
+        </view>
+        <view class="toggle-switch tap-scale {{settings.liuJuDeductBase ? 'toggle-on' : ''}}"
+          data-key="liuJuDeductBase" bindtap="onToggle">
+          <view class="toggle-knob"></view>
+        </view>
+      </view>
+
+      <view class="divider"></view>
+      <view class="setting-row">
+        <view class="sr-left">
+          <text class="sr-label">流局保留庄家</text>
+          <text class="sr-desc">流局后庄家不变，继续连庄</text>
+        </view>
+        <view class="toggle-switch tap-scale {{settings.liuJuKeepZhuang ? 'toggle-on' : ''}}"
+          data-key="liuJuKeepZhuang" bindtap="onToggle">
+          <view class="toggle-knob"></view>
+        </view>
+      </view>
+
+      <view class="divider"></view>
+      <view class="setting-row">
+        <view class="sr-left">
+          <text class="sr-label">流局清零连庄</text>
+          <text class="sr-desc">流局后连庄计数清零</text>
+        </view>
+        <view class="toggle-switch tap-scale {{settings.liuJuResetLianZhuang ? 'toggle-on' : ''}}"
+          data-key="liuJuResetLianZhuang" bindtap="onToggle">
+          <view class="toggle-knob"></view>
+        </view>
+      </view>
+
+    </view>
+  </view>
+
+  <!-- ═══ 保存按钮 ═══ -->
+  <view class="save-btn tap-scale" bindtap="onSave">💾  保存设置</view>
+
+  <!-- ═══ 系统操作 ═══ -->
+  <view class="section-title">⚙️ 系统操作</view>
+  <view class="section card">
+
+    <view class="danger-row tap-scale" bindtap="onRestoreDefault">
+      <text class="danger-icon">🔁</text>
+      <view class="dr-text">
+        <text class="dr-label">恢复默认参数</text>
+        <text class="dr-desc">将所有计分规则重置为初始值</text>
+      </view>
+      <text class="dr-arrow">›</text>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="danger-row tap-scale" bindtap="onClearAllCache">
+      <text class="danger-icon">🗑️</text>
+      <view class="dr-text">
+        <text class="dr-label" style="color:#C0392B">清空全部缓存</text>
+        <text class="dr-desc">清除所有数据，恢复出厂状态</text>
+      </view>
+      <text class="dr-arrow">›</text>
+    </view>
+
+  </view>
+
+  <!-- 底部占位 -->
+  <view style="height: 80rpx;"></view>
+
+</scroll-view>

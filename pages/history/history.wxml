@@ -1,0 +1,90 @@
+<!-- pages/history/history.wxml  历史记录页 -->
+<view class="page">
+
+  <!-- 顶部操作栏 -->
+  <view class="toolbar">
+    <text class="toolbar-info">共 {{history.length}} 条记录</text>
+    <view class="clear-btn tap-scale" bindtap="onClearAll">清空全部</view>
+  </view>
+
+  <!-- 筛选 tab 条 -->
+  <scroll-view class="filter-bar" scroll-x>
+    <view
+      wx:for="{{filterTabs}}" wx:key="type"
+      class="filter-tab tap-scale {{filterType === item.type ? 'filter-active' : ''}}"
+      data-type="{{item.type}}"
+      bindtap="onFilterChange"
+    >{{item.label}}</view>
+  </scroll-view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{isEmpty}}">
+    <text class="empty-icon">🀄</text>
+    <text class="empty-text">暂无历史记录</text>
+    <text class="empty-sub">完成一局后将自动保存</text>
+  </view>
+
+  <!-- 历史列表 -->
+  <view class="list" wx:if="{{!isEmpty}}">
+    <view class="hist-item card" wx:for="{{history}}" wx:key="id">
+
+      <!-- 摘要行 -->
+      <view class="hi-summary" bindtap="onToggleItem" data-id="{{item.id}}">
+        <view class="hi-left">
+          <view class="hi-round-badge">第 {{item.round}} 局</view>
+          <view class="hi-info">
+            <text class="hi-op">{{item.opLabel}}</text>
+            <view class="hi-meta-row">
+              <text class="hi-winner" wx:if="{{item.winnerName}}">🏆 {{item.winnerName}}</text>
+              <text class="hi-sep" wx:if="{{item.winnerName && item.shooterName}}"> · </text>
+              <text class="hi-shooter" wx:if="{{item.shooterName}}">{{item.shooterName}} 点炮</text>
+              <text class="hi-zhuang-tag" wx:if="{{item.isWinnerZhuang}}">庄</text>
+            </view>
+            <text class="hi-lian" wx:if="{{item.lianZhuangCount > 0}}">连庄 ×{{item.lianZhuangCount}}</text>
+          </view>
+        </view>
+        <view class="hi-right">
+          <text class="hi-time">{{item.timeStr}}</text>
+          <text class="hi-expand">{{expandedId === item.id ? '▲' : '▼'}}</text>
+        </view>
+      </view>
+
+      <!-- 详情（展开态） -->
+      <view class="hi-detail" wx:if="{{expandedId === item.id}}">
+        <view class="divider"></view>
+
+        <!-- 四人得失 -->
+        <view class="detail-row" wx:for="{{item.items}}" wx:key="name" wx:for-item="pi">
+          <text class="dr-name">{{pi.name}}</text>
+          <text class="dr-delta {{pi.deltaN > 0 ? 'score-pos' : pi.deltaN < 0 ? 'score-neg' : 'score-zero'}}">
+            {{pi.delta}}
+          </text>
+          <text class="dr-arrow">→</text>
+          <text class="dr-total">总 {{pi.total}}</text>
+        </view>
+
+        <!-- 倍率明细 -->
+        <view class="breakdown-info" wx:if="{{item.breakdown}}">
+          <text class="breakdown-label">倍率明细：</text>
+          <text wx:if="{{item.breakdown.fanRate > 1}}">番型 ×{{item.breakdown.fanRate}} </text>
+          <text wx:if="{{item.breakdown.zhuangRate > 1}}">庄 ×{{item.breakdown.zhuangRate}} </text>
+          <text wx:if="{{item.breakdown.lianRate > 1}}">连庄 ×{{item.breakdown.lianRate}} </text>
+          <text wx:if="{{item.breakdown.doubleRate > 1}}">大胡 ×{{item.breakdown.doubleRate}}</text>
+          <text wx:if="{{!item.breakdown.fanRate && !item.breakdown.zhuangRate && !item.breakdown.lianRate && !item.breakdown.doubleRate}}">无加成</text>
+        </view>
+
+        <!-- 删除按钮 -->
+        <view class="delete-row">
+          <view class="del-btn tap-scale" bindtap="onDeleteItem" data-id="{{item.id}}">
+            🗑 删除此记录
+          </view>
+        </view>
+      </view>
+
+    </view>
+
+    <!-- 底部占位 -->
+    <view style="height: 60rpx;"></view>
+  </view>
+
+</view>
