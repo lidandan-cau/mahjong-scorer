@@ -1,0 +1,6 @@
+# macOS 系统文件
+.DS_Store
+**/.DS_Store
+
+# 微信开发者工具本地私有配置（含个人信息，不上传）
+project.private.config.json

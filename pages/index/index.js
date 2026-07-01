@@ -25,7 +25,8 @@ Page({
     selGangerId:   -1,   // 开杠者（gangPao/qiangGang）
     selGangType:   '',   // 'ming'|'bu'|'an'
     isDouble:      false,
-    selectedFanIds:[],
+    selectedFanIds:    [],
+    selectedFanNamesStr: '', // 已选番型名称，用"+"拼接，直接展示
     panelTitle:    '',
     panelHint:     '',
     previewDeltas: [0,0,0,0],
@@ -114,7 +115,7 @@ Page({
       opStep: 0,
       selWinnerId: -1, selShooterId: -1,
       selGangerId: -1, selGangType: '',
-      isDouble: false, selectedFanIds: [],
+      isDouble: false, selectedFanIds: [], selectedFanNamesStr: '',
       panelTitle: OP_LABELS[type] || type,
       panelHint:  hints[type] || '请选择玩家',
       showGangTypeSel: needGangType,
@@ -181,7 +182,12 @@ Page({
     const ids = [...this.data.selectedFanIds];
     const idx = ids.indexOf(id);
     if (idx >= 0) ids.splice(idx, 1); else ids.push(id);
-    this.setData({ selectedFanIds: ids }, () => this._updatePreview());
+    // 计算已选番型名称字符串，用"+"拼接
+    const namesStr = ids.map(fid => {
+      const f = (this.data.settings.fanTypes || []).find(x => x.id === fid);
+      return f ? f.name : fid;
+    }).join('+');
+    this.setData({ selectedFanIds: ids, selectedFanNamesStr: namesStr }, () => this._updatePreview());
   },
 
   // ── 确认操作 ─────────────────────────────────────────────────

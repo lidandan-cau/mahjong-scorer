@@ -186,7 +186,6 @@
   background: linear-gradient(135deg, #C9A64D, #D4AF37); color: #FFF;
 }
 .psel-name    { font-size: 26rpx; font-weight: 700; color: #4A2800; }
-.psel-score   { font-size: 20rpx; margin-top: 3rpx; font-weight: 600; }
 .psel-preview { font-size: 24rpx; font-weight: 800; margin-top: 4rpx; }
 .psel-winner  { background: linear-gradient(135deg, rgba(139,26,26,0.08), rgba(192,57,43,0.12)); border-color: #C0392B; }
 .psel-shooter { background: linear-gradient(135deg, rgba(139,100,26,0.08), rgba(201,166,77,0.15)); border-color: #C9A64D; }

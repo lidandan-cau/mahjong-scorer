@@ -192,7 +192,6 @@
           <!-- 庄家角标 -->
           <view class="psel-zhuang-tag" wx:if="{{item.isZhuang && settings.zhuangEnabled}}">庄</view>
           <text class="psel-name">{{item.name}}</text>
-          <text class="psel-score {{item.totalScoreCls}}">{{item.totalScoreStr}}</text>
           <!-- 预览得失 -->
           <text
             class="psel-preview {{previewDeltas[item.id] > 0 ? 'score-pos' : previewDeltas[item.id] < 0 ? 'score-neg' : 'score-zero'}}"
@@ -232,7 +231,7 @@
       >
         <text class="fe-label">🎲 选择番型</text>
         <text class="fe-val" wx:if="{{selectedFanIds.length === 0}}">暂未选择</text>
-        <text class="fe-val fe-active" wx:if="{{selectedFanIds.length > 0}}">已选 {{selectedFanIds.length}} 个 ›</text>
+        <text class="fe-val fe-active" wx:if="{{selectedFanIds.length > 0}}">{{selectedFanNamesStr}} ›</text>
       </view>
 
       <!-- 大胡加倍（胡牌操作时显示） -->
